@@ -1,0 +1,19 @@
+---
+title: "Data Exploration"
+output: html_notebook
+---
+
+First, I'll set up my workspace
+```{r}
+rm(list = ls())
+library(here)
+library(tidyverse)
+library(ggfortify)
+```
+
+Now I'll pull in my data
+```{r}
+regen <- read.csv(here("Data", "Regen_data_summer22.csv"))
+ground_cover_density <- read.csv(here("Data", "Ground_cover_canopy_density_summer22.csv"))
+```
+

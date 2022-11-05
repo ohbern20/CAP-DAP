@@ -193,7 +193,29 @@ ggplot(density, aes(x = Canopyapp)) +
 
 I predict the mean to be about 82, with a range from 40-98. 
 
+D. Now I want to look at the levels of some of the factor variables I will use to make sure there is no misenterd data
+```{r}
+levels(density$Forest) #looks good
+```
 
+E. Now I want to plot a couple of boxplots that show some of the relationships between variables (considering a few variables I plan to use in my analysis)
 
+1. Canopy density (I will just do the CanopyApp method for this graph) and Forest
+```{r}
+ggplot(density, aes(x = Forest, y = Canopyapp)) +
+  geom_boxplot() #looks like there could be some fun things happening...e.g. maybe lower canopy density in Degrasse than Donnerville? (possible statistical test!)
+```
+
+2. Percent ferns and forest
+```{r}
+ggplot(density, aes(x = Forest, y = Percent_ferns)) +
+  geom_boxplot() #looks like there could be differences here as well
+```
+
+3. Forest and percent bare ground
+```{r}
+ggplot(density, aes(x = Forest, y = Percent_bare)) +
+  geom_boxplot() #nice!
+```
 
 

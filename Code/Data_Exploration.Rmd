@@ -123,14 +123,13 @@ str(density) #good
 
 B. And now for a summary of the dataframe
 ```{r}
-summary(density) #I can see an issue in the Regen_canopyapp and Densiometer variables. The max values are way to high (and also the means) and I know that these are supposed to be percents so there should be no values greater than 100. Uh oh. I'll need to fix that. 
+summary(density) #nothing seems too out of order 
 ```
 
-ASK ERIKA
 
 C. Now I want to plot histograms of each continuous variable that I might be working with and visualize the mean and range for each 
 
-1. First I'll plot percent bare ground
+1. First I'll plot percent bare ground (these next few variables are data taken from ground cover plots)
 ```{r}
 ggplot(density, aes(x = Percent_bare)) +
   geom_histogram() #doesn't appear to be any outliers
@@ -151,9 +150,48 @@ From looking at the graph I predict the mean of percent non vascular ground cove
 ggplot(density, aes(x = Percent_ferns)) +
   geom_histogram() #doesn't appear to be one lone outlier and nothing beyond 100
 ```
+
 I predict the mean percent ferns to be around 10, with a range from about 0-35. 
 
-4. 
+4. Percent angiosperms
+```{r}
+ggplot(density, aes(x = Percent_angiosperms)) +
+  geom_histogram() #doesn't appear to be any outliers
+```
+
+From looking at the plot I guess the mean percent angiosperms in the ground-cover plots to be about 35, with a range from about 2-75. 
+
+5. Regen densiometer (a measure of canopy density, so a percent, taken above a regen plot)
+```{r}
+ggplot(density, aes(x = Regen_densiometer)) +
+  geom_histogram() #doesn't appear to be any outliers
+```
+
+I predict the mean to be about 87, with a range from about 58-97. 
+
+6. Regen canopyapp (another canopy density measurement above a regen plot)
+```{r}
+ggplot(density, aes(x = Regen_canopyapp)) +
+  geom_histogram() #doesn't seem to be any outliers
+```
+
+I predict the mean to be about 85, with a range from about 53-96. 
+
+7. Densiometer (randomized canopy density reading from the forest plot)
+```{r}
+ggplot(density, aes(x = Densiometer)) +
+  geom_histogram() #doesn't appear to be any outliers
+```
+
+From looking at the graph, I predict the mean to be about 87, with a range from 53-100. 
+
+8. CanoppyApp (rangomized measurement of canopy density within the forest plot)
+```{r}
+ggplot(density, aes(x = Canopyapp)) +
+  geom_histogram() #doesn't appear to be any outliers
+```
+
+I predict the mean to be about 82, with a range from 40-98. 
 
 
 

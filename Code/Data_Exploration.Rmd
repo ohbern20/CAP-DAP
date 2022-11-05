@@ -3,6 +3,11 @@ title: "Data Exploration"
 output: html_notebook
 ---
 
+## Goals for this script:
+
+This is where I will explore my data and check for errors in data entry. I will take an overview look a the data, and then plot individual variables. 
+
+
 First, I'll set up my workspace
 ```{r}
 rm(list = ls())
@@ -14,6 +19,143 @@ library(ggfortify)
 Now I'll pull in my data
 ```{r}
 regen <- read.csv(here("Data", "Regen_data_summer22.csv"))
-ground_cover_density <- read.csv(here("Data", "Ground_cover_canopy_density_summer22.csv"))
+density <- read.csv(here("Data", "Ground_cover_canopy_density_summer22.csv"))
 ```
+
+
+Since I have two dataframes, I will perform data anlaysis on them one at a time. I'll start with the regen dataset first
+
+## Regen Data Exploration
+
+A. First I want to take a look at the structure of the data
+```{r}
+str(regen) #I see that some variables have been imported as characters, I want to change them to factors
+```
+
+I will reimport the data and assign characters to factors upon import
+```{r}
+regen <- read.csv(here("Data", "Regen_data_summer22.csv"), stringsAsFactors = TRUE)
+
+str(regen) #ahh, much better
+```
+
+B. Now I want to look at a more in depth summary of the data
+```{r}
+summary(regen) #I am not seeing anything suspicous as far as outliers, but plotting help will confrim that 
+```
+
+C. Now I want to plot histograms of each continuous variable that I might be working with and visualize the mean and range for each 
+
+1. Percent clouds
+```{r}
+ggplot(regen, aes(x = Percent_clouds)) +
+  geom_histogram() #don't see anything suspicious
+```
+From looking at this histogram, it appears the mean percent clouds is about 50, with a range from 0-100. 
+
+
+2. Regen count
+```{r}
+ggplot(regen, aes(x = Regen_count)) +
+  geom_histogram() #Hmm, there could be an outlier. Looking at the data I see that the highest value occurs in Kip plot 1 with 24 red maple seedlings. Because I know the plot and that there are quite a few red maples, I don't think this is misentered data. 
+```
+
+From looking at this histogram, it appears the mean regen count is around ~5, and the range is about 0-24. 
+
+
+D. Now I want to look at the levels of some of the factor variables I will use to make sure there is no misenterd data
+
+1. Forest
+```{r}
+levels(regen$Forest) #oops, looks like Donnerville has a spelling issue. I will fix it. I want there to be only 6 levels and right now there are 7
+
+bad <- which(regen$Forest == "Donerville")
+regen$Forest[bad] <- "Donnerville"
+unique(regen$Forest) #that looks better!
+```
+
+2. Regen species
+```{r}
+levels(regen$Regen_species) #don't see any mistakes
+```
+
+3. Regen type
+```{r}
+levels(regen$Regen_type) #only two types, good
+```
+
+E. Now I want to plot boxplots of factor variables 
+
+1. Forest and regen_count
+```{r}
+ggplot(regen, aes(x = Forest, y = Regen_count)) +
+  geom_boxplot() #again, I see that high value that occurs on the kip trail. However, since I rember collecting the data and that there were a lot of red maples there I am not concerned
+```
+2. Regen species and regen count
+```{r}
+ggplot(regen, aes(x = Regen_species, y = Regen_count)) +
+  geom_boxplot() +
+  coord_flip()
+#looks like there are lots of juneberry and musclewood present, and quite a few red maple (with 24 at that one site)
+```
+
+3. Regen type and regen count
+```{r}
+ggplot(regen, aes(x = Regen_type, y = Regen_count)) +
+  geom_boxplot() +
+  coord_flip() #can see that the understory in these plots is almost entirely seedlings, with only a few saplings
+```
+
+
+## Density and Ground Cover Data Exploration 
+
+A. First I'll look at the structure of the data
+```{r}
+str(density) #got some character variables that I want to change to factors
+```
+
+I will re-import with stringsAsFactors()
+```{r}
+density <- read.csv(here("Data", "Ground_cover_canopy_density_summer22.csv"), stringsAsFactors = T)
+
+str(density) #good
+```
+
+B. And now for a summary of the dataframe
+```{r}
+summary(density) #I can see an issue in the Regen_canopyapp and Densiometer variables. The max values are way to high (and also the means) and I know that these are supposed to be percents so there should be no values greater than 100. Uh oh. I'll need to fix that. 
+```
+
+ASK ERIKA
+
+C. Now I want to plot histograms of each continuous variable that I might be working with and visualize the mean and range for each 
+
+1. First I'll plot percent bare ground
+```{r}
+ggplot(density, aes(x = Percent_bare)) +
+  geom_histogram() #doesn't appear to be any outliers
+```
+
+From looking at the plot, I would guess the mean for percent bare ground is about 40, and the range is from around 0-95. 
+
+2. Percent non-vascular
+```{r}
+ggplot(density, aes(Percent_nonvascular)) +
+  geom_histogram() #there is no one lone outlier, and nothing greater than 100 (these are percents!) so seems reasonable
+```
+
+From looking at the graph I predict the mean of percent non vascular ground cover to be around 10, with a range from around 0-75. 
+
+3. Percent ferns
+```{r}
+ggplot(density, aes(x = Percent_ferns)) +
+  geom_histogram() #doesn't appear to be one lone outlier and nothing beyond 100
+```
+I predict the mean percent ferns to be around 10, with a range from about 0-35. 
+
+4. 
+
+
+
+
 

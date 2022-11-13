@@ -2,3 +2,137 @@
 title: "Data Analysis"
 output: html_notebook
 ---
+
+First, I'll set up my script
+```{r}
+rm(list = ls())
+library(here)
+library(tidyverse)
+library(ggfortify)
+```
+
+Now, I will import my two (cleaned up) datasets 
+```{r}
+regen <- read.csv(here("Data", "Processed", "correct_regen.csv"))
+density <- read.csv(here("Data", "Processed", "correct_density.csv"))
+```
+
+
+## Statistical Test 1: Regen Canopy Density and Regeneration Count (linear regression)
+
+### 1. I will plot a histogram of each variable I am comparing
+
+Canopy density first. I am choosing to use the densiometer method in this test. I will use the canopyapp method in another test. 
+```{r}
+ggplot(density, aes(x = Regen_densiometer)) + 
+  geom_histogram() +
+  theme_bw() #I do not see one lone outlier, this looks good
+```
+
+Now I will look at the Regen_count variable 
+```{r}
+ggplot(regen, aes(x = Regen_count)) +
+  geom_histogram() +
+  theme_bw() #There seems to be an outlier, but I looked at this in my data exploration and decided it was a real value. I will move forward
+```
+
+### 2. I will plot the variables together
+```{r}
+ggplot(Null, aes(x = Regen_densiometer, y = Regen_count)) + 
+    geom_point(data = density) +
+    geom_step(data = regen)
+```
+
+3. Guess relationship: 
+
+What statistical test to use: I will use a linear regression since the predictor variable (canopy density) is continuous, and the response variable (regeneration) is also continuous. 
+
+4. Create the Model: 
+
+5. Check Assumptions:
+
+6. Interpret Model:
+
+7. Publication Plot: 
+
+
+
+
+## Statistical Test 2: Average Forest Canopy Density and Percent Bare Ground (linear regression)
+
+### 1. First I will plot each variable
+
+Canopy density first
+```{r}
+ggplot(density, aes(x = Canopyapp)) +
+  geom_histogram() +
+  theme_bw() #does not appear to be one lone outlier
+```
+
+Percent bare ground second
+```{r}
+ggplot(density, aes(x = Percent_bare)) +
+  geom_histogram() +
+  theme_bw() #no outliers
+```
+
+### 2. Now I will plot the variables together
+```{r}
+ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
+  geom_point() +
+  theme_bw()
+```
+
+### 3. Guess the relationship: From looking at the data, it appears there could be a weak positive relationship between canopy density and percent bare ground 
+
+Total rise: 100
+Total run: 38 to 98 = 60
+Slope: 100/60 = 1.67
+Y intercept: 0ish?
+
+Null Hypothesis: there is no significant statistical relationship between canopy density and percent bare ground
+
+### 4. Create a model 
+
+Because both the predictor (canopy density) and response (percent bare ground) are continuous, I will use a linear regression. 
+
+I'll construct the model
+```{r}
+density_bare_ground_mod <- lm(Percent_bare ~ Canopyapp, density)
+```
+
+### 5. Check the assumptions 
+```{r}
+autoplot(density_bare_ground_mod)
+```
+Normal Q-Q plot: shows that most of the data points fit a normal distribution, with some of the higher and lower points deviating, but nothing excessive
+Residuals vs fitted plot: shows that variance of residuals is fairly equal (slight waiver in line but nothing too drastic)
+Based on the autoplot() results, I feel moderately comfortable moving ahead and assuming these data meet the linear model assumptions
+
+### 6. Interpret the model
+```{r}
+anova(density_bare_ground_mod)
+```
+The P-value is 0.01603, which is fairly small! I reject the null hypothesis, and accept that canopy density has a significant effect on ground cover. 
+
+I will also run a summary of the test
+```{r}
+summary(density_bare_ground_mod)
+```
+
+Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I predicted. 
+
+### 7. Publication Plot
+```{r}
+ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
+  geom_point() +
+  geom_smooth() +
+  theme_bw()
+  
+```
+
+
+## Statistical Test 3: Forest and Percent Ferns (ANOVA)
+
+## Statistical Test 4: Forest and Regen Count (chi squared)
+

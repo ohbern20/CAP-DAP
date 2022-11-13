@@ -107,6 +107,12 @@ ggplot(regen, aes(x = Regen_type, y = Regen_count)) +
   coord_flip() #can see that the understory in these plots is almost entirely seedlings, with only a few saplings
 ```
 
+Lastly, I will save a new version of my regen data to save the changes I made (e.g. fixing spelling errors in the Forest variable) in the Processed data folder
+```{r}
+write.csv(regen, here("Data", "Processed", "correct_regen.csv"))
+```
+
+
 
 ## Density and Ground Cover Data Exploration 
 
@@ -218,6 +224,12 @@ ggplot(density, aes(x = Forest, y = Percent_ferns)) +
 ggplot(density, aes(x = Forest, y = Percent_bare)) +
   geom_boxplot() #nice!
 ```
+
+And again, I will save this dataframe to the Processed data folder to use later in my analysis
+```{r}
+write.csv(density, here("Data", "Processed", "correct_density.csv"))
+```
+
 
 
 From working through this data exploration I feel confident in how my data are entered, and the histograms of variables seem to make sense. Additionally, from examining a few preliminary box plots, I can see potentially interesting results from statistical tests I plan to conduct in the next section of the Capstone Data Analysis Project. 

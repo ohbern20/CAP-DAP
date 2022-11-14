@@ -20,36 +20,78 @@ density <- read.csv(here("Data", "Processed", "correct_density.csv"))
 
 ## Statistical Test 1: Regen Canopy Density and Regeneration Count (linear regression)
 
+Before I begin the data analysis workflow, I need to manipulate my data because these two variables are found in different dataframes.
+
+A. First I will summarize the regen data to get the a dataframe that includes Forest, Plot, and the number of total regen (not distinguished by species) for that plot
+```{r}
+regen_by_plot <- regen %>% 
+  group_by(Forest, Plot_num) %>%
+  summarize(num_seedlings = mean(Regen_count))
+```
+
+B. Next I will summarize the density data to get a dataframe with the average canopy density (densiometer method) for each plot
+```{r}
+avg_density <- density %>%
+  group_by(Forest, Plot_num) %>%
+  summarize(density = mean(Densiometer))
+```
+
+
+C. Now I will create a new column in each of the dataframes I created above that combines the forest and plot so that each site has a unique ID I can use for combining the dataframes
+```{r}
+regen_by_plot$ID <- paste(regen_by_plot$Forest,regen_by_plot$Plot_num)
+
+avg_density$ID <- paste(avg_density$Forest,avg_density$Plot_num) #that worked so well! 
+```
+
+D. Now I will join the dataframes
+```{r}
+combined_data <- regen_by_plot %>% full_join(avg_density, by = c("ID")) %>%
+  select(-c(Plot_num.x, Forest.x)) %>%
+  rename(c("Forest"="Forest.y", "Plot_num" = "Plot_num.y")) #looks like everything I need is in this dataframe, and there are no duplicate collumns 
+```
+
+I will move into the analysis workflow 
+
 ### 1. I will plot a histogram of each variable I am comparing
 
-Canopy density first. I am choosing to use the densiometer method in this test. I will use the canopyapp method in another test. 
+Canopy density first. 
 ```{r}
-ggplot(density, aes(x = Regen_densiometer)) + 
+ggplot(combined_data, aes(x = density)) + 
   geom_histogram() +
   theme_bw() #I do not see one lone outlier, this looks good
 ```
 
 Now I will look at the Regen_count variable 
 ```{r}
-ggplot(regen, aes(x = Regen_count)) +
+ggplot(combined_data, aes(x = num_seedlings)) +
   geom_histogram() +
-  theme_bw() #There seems to be an outlier, but I looked at this in my data exploration and decided it was a real value. I will move forward
+  theme_bw() #In my data exploration I looked at this variable and determined the data were legit, so even though it looks like there is an outlier I feel good to move ahead.
 ```
 
 ### 2. I will plot the variables together
 ```{r}
-ggplot(Null, aes(x = Regen_densiometer, y = Regen_count)) + 
-    geom_point(data = density) +
-    geom_step(data = regen)
+ggplot(combined_data, aes(x = density, y = num_seedlings)) +
+  geom_point() +
+  theme_bw()
 ```
 
-3. Guess relationship: 
+### 3. Guess relationship: Based on the data, it appears there could be a weak positive relationship between canopy density and the number of seedlings, however this does not really make sense from a biological standpoint, so it is possible there is no significant relationship.
+
 
 What statistical test to use: I will use a linear regression since the predictor variable (canopy density) is continuous, and the response variable (regeneration) is also continuous. 
 
-4. Create the Model: 
+### 4. Create the Model
+```{r}
+regen_dens_mod <- lm(num_seedlings ~ density, combined_data)
+```
 
-5. Check Assumptions:
+
+### 5. Check Assumptions
+```{r}
+autoplot(regen_dens_mod)
+```
+
 
 6. Interpret Model:
 
@@ -58,7 +100,7 @@ What statistical test to use: I will use a linear regression since the predictor
 
 
 
-## Statistical Test 2: Average Forest Canopy Density and Percent Bare Ground (linear regression)
+## Statistical Test 2: Canopy Density and Percent Bare Ground (linear regression)
 
 ### 1. First I will plot each variable
 
@@ -83,7 +125,7 @@ ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
   theme_bw()
 ```
 
-### 3. Guess the relationship: From looking at the data, it appears there could be a weak positive relationship between canopy density and percent bare ground 
+### 3. Guess the relationship: From looking at the data, it appears there could be a weak positive relationship between canopy density and percent bare ground
 
 Total rise: 100
 Total run: 38 to 98 = 60
@@ -113,7 +155,7 @@ Based on the autoplot() results, I feel moderately comfortable moving ahead and 
 ```{r}
 anova(density_bare_ground_mod)
 ```
-The P-value is 0.01603, which is fairly small! I reject the null hypothesis, and accept that canopy density has a significant effect on ground cover. 
+The P-value is 0.01603, which is fairly small. I reject the null hypothesis, and accept that canopy density has a significant effect on ground cover. 
 
 I will also run a summary of the test
 ```{r}
@@ -125,14 +167,93 @@ Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I 
 ### 7. Publication Plot
 ```{r}
 ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
-  geom_point() +
+  geom_point(size = 2) +
   geom_smooth() +
-  theme_bw()
-  
+  xlab("Canopy Density") +
+  ylab("Percent Bare Ground")
+  theme_bw() #adding the smoother provides a better visual for the slight positive relationship between canopy density and bare ground
 ```
 
 
-## Statistical Test 3: Forest and Percent Ferns (ANOVA)
 
-## Statistical Test 4: Forest and Regen Count (chi squared)
+## Statistical Test 3: Percent Ferns Between Kip and Donnerville (Generlized Linear Model)
+
+Before I start the data analysis workflow, I need to filter my data to only get fern data from Kip and Donnerville. The reason I choose to look at these two forests is because during my exploratory data phase I saw there could be a difference between the amount of ferns in these two forests. 
+```{r}
+ferns <- density %>% 
+  filter(Forest == "Kip" | Forest == "Donnerville")
+```
+
+ 
+### 1. Plot each variable
+
+First, I'll plot the percent ferns
+```{r}
+ggplot(ferns, aes(x = Percent_ferns)) +
+  geom_histogram() +
+  theme_bw() #does not appear to be any lone outliers
+```
+
+Next, I'll double check the levels of the Forest variable to make sure there are no mistakes
+```{r}
+unique(ferns$Forest) #only 2 forests, good
+```
+
+### Plot variables together
+```{r}
+ggplot(ferns, aes(x = Forest, y = Percent_ferns)) +
+  geom_boxplot() +
+  theme_bw() #looks like there is variation in the amount of ferns between forests
+```
+### 3. Guess relationship
+From looking at the data, I predict there to be a significant difference between the amount of ferns at each forest. It appears there are more ferns in the Kip forest. 
+
+Null hypothesis: there is no significant relationship between the forest and the amount of ferns present
+
+### 4. Create model
+
+I will fit an ANOVA because I am dealing with a categorical predictor variable with more than two groups (Forest) and a continuous response variable (percent ferns)
+```{r}
+ferns_forest_mod <- lm(Percent_ferns ~ Forest, data = ferns)
+```
+
+### 5. Check assumptions
+```{r}
+autoplot(ferns_forest_mod)
+```
+Normal Q-Q plot: it appears the data fit to the normal distribution with some deviation for small and large values. 
+
+Residuals vs fitted plot: shows that variance of residuals is fairly equal. 
+
+Based on the autoplot() results, I will feel fairly ok with proceeding.   
+
+### 6. Interpret the model 
+```{r}
+anova(ferns_forest_mod) #small p-value!! 
+```
+
+Also run the summary table
+```{r}
+summary(ferns_forest_mod) 
+```
+
+The small p-value leads me to reject my null hypothesis. There is a significant difference in the amounts of ferns between Donnerville and Kip. 
+
+### 7. Now I will make a publication plot
+
+```{r}
+ggplot(ferns, aes(x = Forest, y = Percent_ferns)) +
+  geom_boxplot() 
+```
+
+
+## Statistical Test 4: Forest and Regen Count (GLM)
+
+
+
+
+
+
+
+
 

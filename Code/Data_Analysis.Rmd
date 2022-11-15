@@ -13,12 +13,12 @@ library(ggfortify)
 
 Now, I will import my two (cleaned up) datasets 
 ```{r}
-regen <- read.csv(here("Data", "Processed", "correct_regen.csv"))
-density <- read.csv(here("Data", "Processed", "correct_density.csv"))
+regen <- read.csv(here("Data", "Processed", "correct_regen.csv"), stringsAsFactors = TRUE)
+density <- read.csv(here("Data", "Processed", "correct_density.csv"), stringsAsFactors = TRUE)
 ```
 
 
-## Statistical Test 1: Regen Canopy Density and Regeneration Count (linear regression)
+## Statistical Test 1: Canopy Density and Regeneration Count (linear regression)
 
 Before I begin the data analysis workflow, I need to manipulate my data because these two variables are found in different dataframes.
 
@@ -199,7 +199,7 @@ Next, I'll double check the levels of the Forest variable to make sure there are
 unique(ferns$Forest) #only 2 forests, good
 ```
 
-### Plot variables together
+### 2. Plot variables together
 ```{r}
 ggplot(ferns, aes(x = Forest, y = Percent_ferns)) +
   geom_boxplot() +
@@ -212,14 +212,14 @@ Null hypothesis: there is no significant relationship between the forest and the
 
 ### 4. Create model
 
-I will fit an ANOVA because I am dealing with a categorical predictor variable with more than two groups (Forest) and a continuous response variable (percent ferns)
+I will fit a generalized linear model because I am dealing with a categorical predictor variable with more than two groups (Forest) and a continuous, yet bounded, (0-1) response variable (percent ferns)
 ```{r}
-ferns_forest_mod <- lm(Percent_ferns ~ Forest, data = ferns)
+ferns_forest_glm <- glm(Percent_ferns ~ Forest, data = ferns, family = gaussian()) #gaussian family has a "identiy" link and assumes normal distribution
 ```
 
 ### 5. Check assumptions
 ```{r}
-autoplot(ferns_forest_mod)
+autoplot(ferns_forest_glm)
 ```
 Normal Q-Q plot: it appears the data fit to the normal distribution with some deviation for small and large values. 
 
@@ -229,12 +229,12 @@ Based on the autoplot() results, I will feel fairly ok with proceeding.
 
 ### 6. Interpret the model 
 ```{r}
-anova(ferns_forest_mod) #small p-value!! 
+anova(ferns_forest_glm, test = "Chisq") #very small p-value!!
 ```
 
 Also run the summary table
 ```{r}
-summary(ferns_forest_mod) 
+summary(ferns_forest_glm) 
 ```
 
 The small p-value leads me to reject my null hypothesis. There is a significant difference in the amounts of ferns between Donnerville and Kip. 
@@ -243,14 +243,84 @@ The small p-value leads me to reject my null hypothesis. There is a significant 
 
 ```{r}
 ggplot(ferns, aes(x = Forest, y = Percent_ferns)) +
-  geom_boxplot() 
+  geom_boxplot() +
+  geom_point(position = "jitter", size = 2, alpha = 0.5, color = "blue")+ #generate "noise" to show possible data points 
+  theme_bw() +
+  ylab("Percent Ferns") +
+  xlab("Forest")
 ```
 
 
-## Statistical Test 4: Forest and Regen Count (GLM)
+## Statistical Test 4: Regen count between Peavine and Degrasse (chi squared)
+
+First I will filter my data to get regen count for just South Hammond and Degrasse forests. The reason I am choosing these forests is because I think it would be interesting to compare the amount of regen between a mostly coniferous forest (Degrasse) and a mostly deciduous forest (South Hammond). 
+
+```{r}
+levels(regen$Forest) #first double check levels
+
+regen_chi_squared <- regen %>% 
+  filter(Forest == "Degrasse" | Forest == "South Hammond") 
 
 
+regen_chi_squared$Forest <- factor(regen_chi_squared$Forest) #So R relevels the Forest variable
+levels(regen_chi_squared$Forest) #good
+```
 
+
+### 1. Plot the variables
+
+Now I will plot a histrogram to look for any outliers
+```{r}
+ggplot(regen_chi_squared, aes(x = Regen_count)) +
+  geom_histogram()
+  #nothing looks to crazy, and these numbers seem correct considering what they represent  
+```
+
+Now I will manipulate the data before I plot again 
+```{r}
+total_regen <- regen_chi_squared %>% group_by(Forest) %>% summarise(total_regen = sum(Regen_count))
+```
+
+### 2. Plot varaibles together
+```{r}
+ggplot(total_regen, aes(x = Forest, y = total_regen)) +
+  geom_bar(stat = 'identity', position = 'dodge') + #plotting just the means (identity)
+  theme_bw() 
+```
+
+### 3. Guess relationship
+From looking at the data, it appears there is a significant difference between the amount of regeneration found between the degrasse and south hammond forests. It seems there is more regen in south hammond. 
+
+### 4. Create model
+Now, because I am dealing with a categorical variable with two levels (Forest) and count data (regen) I will run a chi squared test. first I will fit the data to a matrix.
+```{r}
+regen.mat <- xtabs(total_regen ~ Forest,
+                  data = total_regen)
+
+regen.mat #shows a table
+```
+
+
+### 5. Check assumptions
+Count data are assumed to have a normal distribution, so I am not going to check any assumptions here. 
+
+### 6. Interpret the model
+
+Now I will run the chi squared test
+```{r}
+regen.chi <- chisq.test(regen.mat) 
+
+regen.chi #smallish p-value
+```
+Because the p-value is relatively small (less than 0.05), I will reject the null hypothesis. It seems like there is a slightly significant difference between the amount of regen in South Hammond and Degrasse, meaning the forest has an impact on the amount of regen present. 
+
+### 7. Publication plot
+```{r}
+ggplot(regen_chi_squared, aes(x = Forest, y = Regen_count)) +
+  geom_boxplot() +
+  theme_bw() +
+  ylab("Regen Count")
+```
 
 
 

@@ -89,7 +89,7 @@ regen_dens_mod <- lm(num_seedlings ~ density, combined_data)
 
 ### 5. Check Assumptions
 ```{r}
-autoplot(regen_dens_mod)
+autoplot(regen_dens_mod, smooth.colour = NA)
 ```
 
 
@@ -214,7 +214,9 @@ Null hypothesis: there is no significant relationship between the forest and the
 
 I will fit a generalized linear model because I am dealing with a categorical predictor variable with more than two groups (Forest) and a continuous, yet bounded, (0-1) response variable (percent ferns)
 ```{r}
-ferns_forest_glm <- glm(Percent_ferns ~ Forest, data = ferns, family = gaussian()) #gaussian family has a "identiy" link and assumes normal distribution
+ferns_forest_glm <- glm(Percent_ferns ~ Forest, data = ferns, family = poisson())
+
+#poisson family has a ___ link and assumes a poisson distribution
 ```
 
 ### 5. Check assumptions
@@ -222,6 +224,10 @@ ferns_forest_glm <- glm(Percent_ferns ~ Forest, data = ferns, family = gaussian(
 autoplot(ferns_forest_glm)
 ```
 Normal Q-Q plot: it appears the data fit to the normal distribution with some deviation for small and large values. 
+
+```{r}
+summary(ferns_forest_glm)
+```
 
 Residuals vs fitted plot: shows that variance of residuals is fairly equal. 
 
@@ -251,7 +257,7 @@ ggplot(ferns, aes(x = Forest, y = Percent_ferns)) +
 ```
 
 
-## Statistical Test 4: Regen count between Peavine and Degrasse (chi squared)
+## Statistical Test 4: Regen count between Peavine and Degrasse (chi squared -- or GLM)
 
 First I will filter my data to get regen count for just South Hammond and Degrasse forests. The reason I am choosing these forests is because I think it would be interesting to compare the amount of regen between a mostly coniferous forest (Degrasse) and a mostly deciduous forest (South Hammond). 
 
@@ -318,9 +324,14 @@ Because the p-value is relatively small (less than 0.05), I will reject the null
 ```{r}
 ggplot(regen_chi_squared, aes(x = Forest, y = Regen_count)) +
   geom_boxplot() +
+  geom_point() +
   theme_bw() +
   ylab("Regen Count")
 ```
+
+
+
+
 
 
 

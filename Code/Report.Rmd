@@ -12,26 +12,26 @@ Here, I conduct four statistical tests. Below I will provide a justification for
 
 #### Hypothesis 1: The amount of regeneration present in a site is impacted by Canopy Density. I expect to see a decrease in regeneration as canopy density increases. 
 
-Justification: Madsen P. and Larson J.B. (1997). Natural regeneration of beech (Fagus sylvatica L.) with respect to canopy density, soil moisture, and soil carbon content. Science Direct, 97(2), 95-105. 
+**Justification:** [Madsen P. and Larson J.B. (1997). Natural regeneration of beech (*Fagus sylvatica L.*) with respect to canopy density, soil moisture, and soil carbon content. *Science Direct,* 97(2), 95-105.](https://www.sciencedirect.com/science/article/pii/S0378112797000911)
 
 This study found that “generally, the number of saplings was reduced by increased canopy density. The number of saplings varied greatly in plots with open canopies; whereas, the number of saplings was consistently low in plots with a closed canopy” (p. 99). 
 
 #### Hypothesis 2: As canopy density increases, the amount of bare ground on the forest floor will increase. 
 
-Justification: Supporting literature: Goldblum D. (2009). The effects of treefall gaps on understory vegetation in New York State. Journal of Vegetation Science, 8(1), 125-132. 
+**Justification:** [Supporting literature: Goldblum D. (2009). The effects of treefall gaps on understory vegetation in New York State. *Journal of Vegetation Science,* 8(1), 125-132.](https://onlinelibrary.wiley.com/doi/abs/10.2307/3237250) 
 
 This study found greater vegetation abundance under more open canopies, which suggests there would be less vegetation abundance, and therefore more bare ground, under more closed canopies. 
 
 #### Hypothesis 3: The amount of ferns will be statistically different between the Kip and Donnerville forests. 
 
-Justification: Rooney T.P. (2001). Deer impacts on forest ecosystems: a North American perspective. Forestry: An International Journal of Forest Research, 74(3), 201-208.  
+**Justification:** [Rooney T.P. (2001). Deer impacts on forest ecosystems: a North American perspective. *Forestry: An International Journal of Forest Research,* 74(3), 201-208.](https://academic.oup.com/forestry/article/74/3/201/518135)  
 
 This study found that “excessive deer browsing can create forests dominated by ferns in the understory" (p. 205). As I have gone through game camera data from these sites, I have noticed differing amounts of deer at the forests so it seems like there could also be different amounts of ferns between forests. 
 
 
 #### Hypothesis 4: The amount of regeneration will differ between Peavine and Degrasse forests. 
 
-Justification: Supporting literature: Madsen P. and Larson J.B. (1997). Natural regeneration of beech (Fagus sylvatica L.) with respect to canopy density, soil moisture, and soil carbon content. Science Direct, 97(2), 95-105.
+**Justification:** [Supporting literature: Madsen P. and Larson J.B. (1997). Natural regeneration of beech (Fagus sylvatica L.) with respect to canopy density, soil moisture, and soil carbon content. *Science Direct,* 97(2), 95-105.](https://www.sciencedirect.com/science/article/pii/S0378112797000911)
 
 This study looked at how light availability impacts regeneration. Because Peavine is a deciduous forest, and Degrasse is coniferous, there could be differing amounts of light reaching the forest floor as deciduous leaves are broader and tend to produce more shade. For this reason, it seems possible that there could be different amounts of regeneration between these two forests. 
 

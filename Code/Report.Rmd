@@ -31,7 +31,7 @@ This study found that “excessive deer browsing can create forests dominated by
 
 #### Hypothesis 4: The amount of regeneration will differ between Peavine and Degrasse forests. 
 
-**Justification:** [Supporting literature: Madsen P. and Larson J.B. (1997). Natural regeneration of beech (Fagus sylvatica L.) with respect to canopy density, soil moisture, and soil carbon content. *Science Direct,* 97(2), 95-105.](https://www.sciencedirect.com/science/article/pii/S0378112797000911)
+**Justification:** [Supporting literature: Madsen P. and Larson J.B. (1997). Natural regeneration of beech (*Fagus sylvatica L.*) with respect to canopy density, soil moisture, and soil carbon content. *Science Direct,* 97(2), 95-105.](https://www.sciencedirect.com/science/article/pii/S0378112797000911)
 
 This study looked at how light availability impacts regeneration. Because Peavine is a deciduous forest, and Degrasse is coniferous, there could be differing amounts of light reaching the forest floor as deciduous leaves are broader and tend to produce more shade. For this reason, it seems possible that there could be different amounts of regeneration between these two forests. 
 

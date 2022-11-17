@@ -76,7 +76,12 @@ ggplot(combined_data, aes(x = density, y = num_seedlings)) +
   theme_bw()
 ```
 
-### 3. Guess relationship: Based on the data, it appears there could be a weak positive relationship between canopy density and the number of seedlings, however this does not really make sense from a biological standpoint, so it is possible there is no significant relationship.
+### 3. Guess relationship: Based on the data, it appears there could be a weak positive relationship between canopy density and the number of seedlings.
+
+Total rise: 14
+Total run: 58 to 94, so 44
+Slope: 15/44 = 0.34  
+Y intercept: 0ish
 
 
 What statistical test to use: I will use a linear regression since the predictor variable (canopy density) is continuous, and the response variable (regeneration) is also continuous. 
@@ -91,12 +96,22 @@ regen_dens_mod <- lm(num_seedlings ~ density, combined_data)
 ```{r}
 autoplot(regen_dens_mod, smooth.colour = NA)
 ```
+The normal Q-Q graph looks good, nand indicates the data are fairly normally distributed, with some smaller and larger values deviating. The Residuals vs. fitted graph indicates relatively equal variance. I am comfortable moving forward.  
 
+### 6. Interpret Model:
 
-6. Interpret Model:
+```{r}
+anova(regen_dens_mod) #asking for standard output of an anova, not calculating an anova  
+```
+The P-value is 0.8527 which is large - accept null hypothesis (that there is no meaningful statistical relationship b/w regen and canopy density) 
 
-7. Publication Plot: 
+I will also run the summary 
+```{r}
+summary(regen_dens_mod) 
+```
+Estimates R-squared to be 0.002375, which means only a 0.2% of variation in regen is explained by canopy density. 
 
+I will not make a publication plot since no statistically significant findings were found. 
 
 
 

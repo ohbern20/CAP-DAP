@@ -50,7 +50,7 @@ Now, I will import my two (cleaned up) datasets
 regen <- read.csv(here("Data", "Processed", "correct_regen.csv"), stringsAsFactors = TRUE)
 density <- read.csv(here("Data", "Processed", "correct_density.csv"), stringsAsFactors = TRUE)
 ```
-
+You might make a note here to see Data_Exploration.Rmd to see how the data were cleaned.
 
 ### Statistical Test 1: Canopy Density and Regeneration Count 
 
@@ -228,7 +228,7 @@ ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
   xlab("Canopy Density") +
   ylab("Percent Bare Ground") 
 ```
-
+Swap to geom_smooth(method = "lm") as per notes in Data_Analysis.Rmd
 
 ### Statistical Test 3: Percent Ferns Between Kip and Donnerville
 

@@ -22,7 +22,7 @@ density <- read.csv(here("Data", "Processed", "correct_density.csv"), stringsAsF
 
 Before I begin the data analysis workflow, I need to manipulate my data because these two variables are found in different dataframes.
 
-A. First I will summarize the regen data to get the a dataframe that includes Forest, Plot, and the number of total regen (not distinguished by species) for that plot
+A. First I will summarize the regen data to get  a dataframe that includes Forest, Plot, and the number of total regen (not distinguished by species) for that plot
 ```{r}
 regen_by_plot <- regen %>% 
   group_by(Forest, Plot_num) %>%
@@ -78,6 +78,7 @@ ggplot(combined_data, aes(x = density, y = num_seedlings)) +
 
 ### 3. Guess relationship: Based on the data, it appears there could be a weak positive relationship between canopy density and the number of seedlings.
 
+
 Total rise: 14
 Total run: 58 to 94, so 44
 Slope: 15/44 = 0.34  
@@ -85,6 +86,8 @@ Y intercept: 0ish
 
 
 What statistical test to use: I will use a linear regression since the predictor variable (canopy density) is continuous, and the response variable (regeneration) is also continuous. 
+
+We are fudging a little bit because canopy density is not strictly continuous since it ranges b/w 0 and 100. 
 
 ### 4. Create the Model
 ```{r}
@@ -96,7 +99,9 @@ regen_dens_mod <- lm(num_seedlings ~ density, combined_data)
 ```{r}
 autoplot(regen_dens_mod, smooth.colour = NA)
 ```
-The normal Q-Q graph looks good, nand indicates the data are fairly normally distributed, with some smaller and larger values deviating. The Residuals vs. fitted graph indicates relatively equal variance. I am comfortable moving forward.  
+The normal Q-Q graph looks good, and indicates the data are fairly normally distributed, with some smaller and larger values deviating. The Residuals vs. fitted graph indicates relatively equal variance. I am comfortable moving forward.  
+
+I think residuals vs. fitted is a bit off, but you are probabaly ok here. We might think about running a glm vs. lm.
 
 ### 6. Interpret Model:
 
@@ -113,7 +118,7 @@ Estimates R-squared to be 0.002375, which means only a 0.2% of variation in rege
 
 I will not make a publication plot since no statistically significant findings were found. 
 
-
+Looks good. Even if we change to a glm I don't think we'll see a difference.
 
 ## Statistical Test 2: Canopy Density and Percent Bare Ground (linear regression)
 
@@ -166,6 +171,8 @@ Normal Q-Q plot: shows that most of the data points fit a normal distribution, w
 Residuals vs fitted plot: shows that variance of residuals is fairly equal (slight waiver in line but nothing too drastic)
 Based on the autoplot() results, I feel moderately comfortable moving ahead and assuming these data meet the linear model assumptions
 
+Again, I think your residuals might be wonky, as they seem to go up in the middle. Also, because canopy-app also ranges b/w 0 and 100 and is not truly continuous, might consider glm.
+
 ### 6. Interpret the model
 ```{r}
 anova(density_bare_ground_mod)
@@ -176,6 +183,7 @@ I will also run a summary of the test
 ```{r}
 summary(density_bare_ground_mod)
 ```
+Even though p is very small, so is R2. So you have a significant, but not very strong, relationship.
 
 Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I predicted. 
 
@@ -183,13 +191,16 @@ Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I 
 ```{r}
 ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
   geom_point(size = 2) +
-  geom_smooth() +
+  geom_smooth(method = "lm") + # I tweaked a touch here
   xlab("Canopy Density") +
   ylab("Percent Bare Ground")
   theme_bw() #adding the smoother provides a better visual for the slight positive relationship between canopy density and bare ground
 ```
 
 
+I tweaked your plot to use smooth(method="lm" since you ran lm as your model.)
+
+In my dream world, you would run 3 different statistical tests, but since you did some extra work to figure out how to join the data frames, I'll count that instead.
 
 ## Statistical Test 3: Percent Ferns Between Kip and Donnerville (Generlized Linear Model)
 
@@ -233,6 +244,8 @@ ferns_forest_glm <- glm(Percent_ferns ~ Forest, data = ferns, family = poisson()
 
 #poisson family has a ___ link and assumes a poisson distribution
 ```
+For family = poisson() the link is log(). You can see this if you searhc "family" in the help.
+
 
 ### 5. Check assumptions
 ```{r}
@@ -257,6 +270,9 @@ Also run the summary table
 ```{r}
 summary(ferns_forest_glm) 
 ```
+I think you may have an overdispersion problem that we should address.  I doubt that addressing it will have much impact on your statistical outcome. See chapter 7, pp 194 - 197. It is probably caused by the high number of cases where percent ferns = 0. See the part about zero inflation see pp. 198-199. Learning some crazy stuff here!
+
+
 
 The small p-value leads me to reject my null hypothesis. There is a significant difference in the amounts of ferns between Donnerville and Kip. 
 
@@ -296,6 +312,7 @@ ggplot(regen_chi_squared, aes(x = Regen_count)) +
   geom_histogram()
   #nothing looks to crazy, and these numbers seem correct considering what they represent  
 ```
+Look at the spike at zero - you likely have the zero inflation problem here, too. It is a common problem for biological data.
 
 Now I will manipulate the data before I plot again 
 ```{r}
@@ -308,6 +325,7 @@ ggplot(total_regen, aes(x = Forest, y = total_regen)) +
   geom_bar(stat = 'identity', position = 'dodge') + #plotting just the means (identity)
   theme_bw() 
 ```
+You aren't plotting the means though, you're plotting the count, right?
 
 ### 3. Guess relationship
 From looking at the data, it appears there is a significant difference between the amount of regeneration found between the degrasse and south hammond forests. It seems there is more regen in south hammond. 
@@ -320,7 +338,7 @@ regen.mat <- xtabs(total_regen ~ Forest,
 
 regen.mat #shows a table
 ```
-
+Because you are comparing total counts, you don't have to worry about zero inflation.
 
 ### 5. Check assumptions
 Count data are assumed to have a normal distribution, so I am not going to check any assumptions here. 
@@ -344,7 +362,11 @@ ggplot(regen_chi_squared, aes(x = Forest, y = Regen_count)) +
   ylab("Regen Count")
 ```
 
+I think this is a case where a bar plot would be better than a box plot - you are comparing the total counts, and there is no variance, so presenting it as though you were focused on the variance is not consistent with the statistical test you ran.
 
+The alternative would be to do a glm where you maintain the variance by looking at the amount of regen in each of the regen plots per forest, in which case we go back to the zero inflation issue and a glm. Your call, but if you stick with a chi-square, then stick with a bar plot.
+
+This is a really good, thorough data analysis!
 
 
 

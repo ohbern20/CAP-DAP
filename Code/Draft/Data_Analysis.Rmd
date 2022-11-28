@@ -1,6 +1,8 @@
 ---
 title: "Data Analysis"
-output: html_notebook
+author: "Olivia"
+date: "11/28/2022"
+output: html_document
 ---
 
 First, I'll set up my script

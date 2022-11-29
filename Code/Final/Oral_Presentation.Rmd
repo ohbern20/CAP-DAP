@@ -1,8 +1,8 @@
 ---
-title: "Capstone Data Analysis Project Report"
-output:
-  html_document:
-    df_print: paged
+title: "Cap DAP Presentation"
+author: "Olivia Bernier"
+date: "11/30/2022"
+output: html_document
 ---
 
 ## Introduction 
@@ -121,7 +121,7 @@ Slope: 15/44 = 0.34
 
 Y intercept: 0ish
 
-Decide on statistical test: I will use a linear regression since the predictor variable (canopy density) is continuous, and the response variable (regeneration) is also continuous. 
+Decide on statistical test: I will use a linear regression since the predictor variable (canopy density) is somewhat continuous (0-100), and the response variable (regeneration) is also continuous. 
 
 #### 4. Create the Model
 ```{r}
@@ -133,7 +133,9 @@ regen_dens_mod <- lm(num_seedlings ~ density, combined_data)
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 autoplot(regen_dens_mod, smooth.colour = NA)
 ```
-The normal Q-Q graph looks good, nand indicates the data are fairly normally distributed, with some smaller and larger values deviating. The Residuals vs. fitted graph indicates relatively equal variance. I am comfortable moving forward.  
+
+
+The normal Q-Q graph looks good, and indicates the data are fairly normally distributed, with some smaller and larger values deviating. The Residuals vs. fitted graph indicates relatively equal variance, but is a little off. I am comfortable moving forward for now, but I might change my statistical test to a GLM in the future.  
 
 #### 6. Interpret Model:
 
@@ -205,26 +207,26 @@ Normal Q-Q plot: shows that most of the data points fit a normal distribution, w
 
 Residuals vs fitted plot: shows that variance of residuals is fairly equal (slight waiver in line but nothing too drastic)
 
-Based on the autoplot() results, I feel moderately comfortable moving ahead and assuming these data meet the linear model assumptions
+Based on the autoplot() results, I feel moderately comfortable moving ahead and assuming these data meet the linear model assumptions. I might change this test to a GLM as well as the assumptions could be better met. However, it is unlikely the outcome of the statistical test would be very different. 
 
 #### 6. Interpret the model
 ```{r, echo=FALSE}
 anova(density_bare_ground_mod)
 ```
-The P-value is 0.01603, which is fairly small. I reject the null hypothesis, and accept that canopy density has a significant effect on ground cover. 
+The P-value is 0.01603, which is fairly small. I reject the null hypothesis, and accept that canopy density has a significant effect on ground cover.  
 
 I will also run a summary of the test
 ```{r, echo=FALSE}
 summary(density_bare_ground_mod)
 ```
 
-Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I predicted. 
+Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I predicted. However, the R2 value is fairly small which means even though there is a significant relationship between canopy density and bare ground it is not a particularly strong relationship. 
 
 #### 7. Publication Plot
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
   geom_point(size = 2) +
-  geom_smooth() +
+  geom_smooth(method = "lm") +
   xlab("Canopy Density") +
   ylab("Percent Bare Ground") 
 ```
@@ -250,6 +252,8 @@ ggplot(ferns, aes(x = Percent_ferns)) +
   geom_histogram() +
   theme_bw() 
 ```
+It is possible I will run into an issue known as over dispersion that results from, in this case, the high number of instances with zero ferns. I have not yet worked out how to account for this, but might do so for my final analysis. 
+
 
 #### 2. Plot variables together
 ```{r, echo=FALSE}
@@ -265,7 +269,7 @@ Null hypothesis: there is no significant relationship between the forest and the
 
 #### 4. Create model
 
-I will fit a generalized linear model because I am dealing with a categorical predictor variable with more than two groups (Forest) and a continuous, yet bounded, (0-1) response variable (percent ferns)
+I will fit a generalized linear model because I am dealing with a categorical predictor variable with more than two groups (Forest) and a continuous, yet bounded, (0-1) response variable (percent ferns). A generalized linear model allows you to specify the distribution of the data (family), which in this case is Poisson and specific to count data.  
 ```{r}
 ferns_forest_glm <- glm(Percent_ferns ~ Forest, data = ferns, family = poisson())
 
@@ -288,7 +292,7 @@ Based on the autoplot() results, I will feel ok with proceeding.
 anova(ferns_forest_glm, test = "Chisq") 
 ```
 
-Notics a very small p-value!
+Notice a very small p-value!
 
 Also run the summary table
 ```{r, echo=FALSE}
@@ -329,6 +333,7 @@ Now I will plot a histogram of regeneration count to look for any outliers
 ggplot(regen_chi_squared, aes(x = Regen_count)) +
   geom_histogram()
 ```
+Again, could be the zero inflation issue here as well. 
 
 Now I will manipulate the data before I plot again to get a column with the total regen count regardless of species
 ```{r}
@@ -338,12 +343,12 @@ total_regen <- regen_chi_squared %>% group_by(Forest) %>% summarise(total_regen 
 #### 2. Plot varaibles together
 ```{r, echo=FALSE}
 ggplot(total_regen, aes(x = Forest, y = total_regen)) +
-  geom_bar(stat = 'identity', position = 'dodge') + #plotting just the means (identity)
+  geom_bar(stat = 'identity', position = 'dodge') + #plotting the count 
   theme_bw() 
 ```
 
 #### 3. Guess relationship: 
-From looking at the data, it appears there is a significant difference between the amount of regeneration found between the degrasse and south hammond forests. It seems there is more regen in south hammond. 
+From looking at the data, it appears there is a significant difference between the amount of regeneration found between the Degrasse and South Hammond forests. It seems there is more regen in South Hammond. 
 
 #### 4. Create model
 Now, because I am dealing with a categorical variable with two levels (Forest) and count data (regen) I will run a chi squared test. first I will fit the data to a matrix.
@@ -370,9 +375,15 @@ Because the p-value is relatively small (less than 0.05), I will reject the null
 
 #### 7. Publication plot
 ```{r, echo=FALSE}
-ggplot(regen_chi_squared, aes(x = Forest, y = Regen_count)) +
-  geom_boxplot() +
-  geom_point() +
+#Before plotting I am going to summarize the data a bit to get standard deviation for errorbars.
+regen_for_plotting <- regen_chi_squared %>% group_by(Forest) %>%
+  summarize(total_count = sum(Regen_count), sd_regen = sd(Regen_count))
+```
+
+```{r, echo=FALSE}
+ggplot(regen_for_plotting, aes(x = Forest, y = total_count)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin= total_count-sd_regen, ymax= total_count+sd_regen), width=.2, position = position_dodge(.9)) +
   theme_bw() +
   ylab("Regen Count")
 ```

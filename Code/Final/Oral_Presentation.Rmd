@@ -269,7 +269,7 @@ Null hypothesis: there is no significant relationship between the forest and the
 
 #### 4. Create model
 
-I will fit a generalized linear model because I am dealing with a categorical predictor variable with more than two groups (Forest) and a continuous, yet bounded, (0-1) response variable (percent ferns). A generalized linear model allows you to specify the distribution of the data (family), which in this case is Poisson and specific to count data.  
+I will fit a generalized linear model because I am dealing with a categorical predictor variable (Forest) and a continuous, yet bounded, (0-1) response variable (percent ferns). A generalized linear model allows you to specify the distribution of the data (family), which in this case is Poisson and specific to count data.  
 ```{r}
 ferns_forest_glm <- glm(Percent_ferns ~ Forest, data = ferns, family = poisson())
 

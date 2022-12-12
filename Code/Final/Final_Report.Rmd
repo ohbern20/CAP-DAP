@@ -1,12 +1,19 @@
 ---
 title: "Capstone Data Analysis Project Report"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
 
 ## Introduction 
-The goal of this research is to look at various relationships among forest metrics including canopy density, regeneration, and fern abundance. I collected this data in multiple forests in St. Lawrence County during summer 2022. 
+The goal of this research is to look at various relationships among forest metrics including canopy density, regeneration, fern abundance, and tree cores. I collected this data in multiple forests in St. Lawrence County during summer 2022. 
+
+```{r, echo=FALSE, fig.cap="Here I am coring a tree!", fig.align='center', out.width='50%', message=FALSE}
+library(here)
+knitr::include_graphics(here("Images", "IMG_9604.JPG"))
+```
+
 
 Here, I conduct four statistical tests. Below I will provide a justification for each test I conduct to support my hypotheses. 
 
@@ -45,18 +52,17 @@ library(tidyverse)
 library(ggfortify)
 ```
 
-Now, I will import my two (cleaned up) datasets 
+Now, I will import my two (cleaned up) datasets. To see how the data were cleaned, view Data_Exploration.Rmd.
 ```{r, include=FALSE}
 regen <- read.csv(here("Data", "Processed", "correct_regen.csv"), stringsAsFactors = TRUE)
 density <- read.csv(here("Data", "Processed", "correct_density.csv"), stringsAsFactors = TRUE)
 ```
-You might make a note here to see Data_Exploration.Rmd to see how the data were cleaned.
 
 ### Statistical Test 1: Canopy Density and Regeneration Count 
 
 Before I begin the data analysis workflow, I need to manipulate my data because these two variables are found in different dataframes.
 
-A. First I will summarize the regen data to get the a dataframe that includes Forest, Plot, and the number of total regen (not distinguished by species) for that plot
+A. First I will summarize the regen data to get a dataframe that includes Forest, Plot, and the number of total regen (not distinguished by species) for that plot
 ```{r, message=FALSE}
 regen_by_plot <- regen %>% 
   group_by(Forest, Plot_num) %>%
@@ -90,6 +96,7 @@ I will move into the analysis workflow
 #### 1. I will plot a histogram of each variable I am comparing
 
 Canopy density first. 
+
 ```{r, echo=FALSE, message=FALSE}
 ggplot(combined_data, aes(x = density)) + 
   geom_histogram() +
@@ -97,6 +104,7 @@ ggplot(combined_data, aes(x = density)) +
 ```
 
 Now I will look at the Regen_count variable 
+
 ```{r, echo=FALSE, message=FALSE}
 ggplot(combined_data, aes(x = num_seedlings)) +
   geom_histogram() +
@@ -133,20 +141,23 @@ regen_dens_mod <- lm(num_seedlings ~ density, combined_data)
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 autoplot(regen_dens_mod, smooth.colour = NA)
 ```
-The normal Q-Q graph looks good, nand indicates the data are fairly normally distributed, with some smaller and larger values deviating. The Residuals vs. fitted graph indicates relatively equal variance. I am comfortable moving forward.  
+
+The normal Q-Q graph looks good, and indicates the data are fairly normally distributed, with some smaller and larger values deviating. The Residuals vs. fitted graph indicates relatively equal variance. I am comfortable moving forward.  
 
 #### 6. Interpret Model:
 
 ```{r, message=FALSE, echo=FALSE}
 anova(regen_dens_mod)   
 ```
-The P-value is 0.8527 which is large - accept null hypothesis (that there is no meaningful statistical relationship b/w regen and canopy density) 
+
+The P-value is 0.8527 which is large - accept null hypothesis (that there is no meaningful statistical relationship between regen and canopy density) 
 
 I will also run the summary 
 ```{r, message=FALSE, echo=FALSE}
 summary(regen_dens_mod) 
 ```
-Estimates R-squared to be 0.002375, which means only a 0.2% of variation in regen is explained by canopy density. 
+
+Estimates R-squared to be 0.002375, which means only 0.2% of variation in regen is explained by canopy density. 
 
 I will not make a publication plot since no statistically significant findings were found. 
 
@@ -190,32 +201,33 @@ Null Hypothesis: there is no significant statistical relationship between canopy
 
 #### 4. Create a model 
 
-Because both the predictor (canopy density) and response (percent bare ground) are continuous, I will use a linear regression. 
+Because the predictor (canopy density) is continuous but bounded between 0-100, and the response (percent bare ground) is continuous, I will use a generalized linear model. 
 
 I'll construct the model
 ```{r}
-density_bare_ground_mod <- lm(Percent_bare ~ Canopyapp, density)
+density_bare_ground_glm <- glm(Percent_bare ~ Canopyapp, data = density, family = gaussian())
 ```
 
 #### 5. Check the assumptions 
 ```{r, echo=FALSE, warning=FALSE}
-autoplot(density_bare_ground_mod)
+autoplot(density_bare_ground_glm)
 ```
+
 Normal Q-Q plot: shows that most of the data points fit a normal distribution, with some of the higher and lower points deviating, but nothing excessive
 
 Residuals vs fitted plot: shows that variance of residuals is fairly equal (slight waiver in line but nothing too drastic)
 
-Based on the autoplot() results, I feel moderately comfortable moving ahead and assuming these data meet the linear model assumptions
+Based on the autoplot() results, I feel moderately comfortable moving ahead and assuming these data meet the glm assumptions. 
 
 #### 6. Interpret the model
 ```{r, echo=FALSE}
-anova(density_bare_ground_mod)
+anova(density_bare_ground_glm)
 ```
 The P-value is 0.01603, which is fairly small. I reject the null hypothesis, and accept that canopy density has a significant effect on ground cover. 
 
 I will also run a summary of the test
 ```{r, echo=FALSE}
-summary(density_bare_ground_mod)
+summary(density_bare_ground_glm)
 ```
 
 Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I predicted. 
@@ -224,7 +236,7 @@ Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
   geom_point(size = 2) +
-  geom_smooth() +
+  geom_smooth(method = "lm") +
   xlab("Canopy Density") +
   ylab("Percent Bare Ground") 
 ```
@@ -385,15 +397,15 @@ It was interesting to find that canopy density did not have a statistically sign
 
 Since I found that as canopy density increased, percent bare ground also increased, it seems like there could also be a correlation between canopy density and regeneration. If there is more bare ground at a site, then it seems like there would be less regeneration. 
 
-I found that the amount of ferns was statistically different between Kip and Donnerville. Because ferns are an indicator of forest health, it would be interesting to compare the amount of ferns at other forests as well. Comparing ferns to other metrics (maybe canopy density, or soil data) could also be interesting. 
+I found that the amount of ferns was statistically different between Kip and Donnerville. Because ferns are an indicator of forest health, it would be interesting to compare the amount of ferns at other forests as well. Comparing ferns to other metrics (maybe canopy density or soil data) could also be interesting. 
 
-There was a statistically significant difference in the amount of regen between Degrasse and South Hammond. Considering possible biological reasons behind that finding, it could be interesting to do an analysis that looks at the tree species in both of these forests. I was initially expecting Degrasse to have more regen because it is coniferous, and I was thinking the absence of broad leaves would let more light to the canopy floor. Instead, I found South Hammond had more regen. However, in another test I found that canopy density and regen were not statistically correlated, so perhaps there are other factors going on between Degrasse and South Hammond other than canopy density/light availability that could expain the difference in regen I found between these two forests. 
+There was a statistically significant difference in the amount of regeneration between Degrasse and South Hammond. Considering possible biological reasons behind that finding, it could be interesting to do an analysis that looks at the tree species in both of these forests. I was initially expecting Degrasse to have more regen because it is coniferous, and I was thinking the absence of broad leaves would allow more light to reach the canopy floor. Instead, I found South Hammond had more regen. However, in another test I found that canopy density and regen were not statistically correlated, so perhaps there are other factors going on between Degrasse and South Hammond other than canopy density/light availability that could explain the difference in regen I found between these two forests. 
 
 
 ## Challenges 
-One of the challenges I encountered with this project was figuring out how to compare variables from two different data frames. I ended up using `full_join()` to merge the dataframes which I have done in the past but had forgotten how to do. I think was a really useful skill to refresh. 
+One of the challenges I encountered with this project was figuring out how to compare variables from two different data frames. I ended up using `full_join()` to merge the dataframes which I have done in the past but had forgotten how to do. I think `full_join()` was a really useful skill to refresh. 
 
-Another challenge I faced was figuring out which family to use for my generalized linear model statistical test. I have not had much stats, so the concept of families was new to me. However, after some time on stack overflow and with help from GSWR and Erika, I figured out the Poisson family was the best fit. 
+Another challenge I faced was figuring out which families to use for my generalized linear model statistical tests. I have not had much stats, so the concept of families was new to me. However, after some time on stack overflow and with help from GSWR and Erika, I figured out which families were the best fits. 
 
 
 

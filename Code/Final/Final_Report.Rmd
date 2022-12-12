@@ -129,7 +129,7 @@ Slope: 15/44 = 0.34
 
 Y intercept: 0ish
 
-Decide on statistical test: I will use a linear regression since the predictor variable (canopy density) is continuous, and the response variable (regeneration) is also continuous. 
+Decide on statistical test: I will use a linear regression since the predictor variable (canopy density) is somewhat continuous, and the response variable (regeneration) is also somewhat continuous. 
 
 #### 4. Create the Model
 ```{r}
@@ -205,7 +205,7 @@ Because the predictor (canopy density) is continuous but bounded between 0-100, 
 
 I'll construct the model
 ```{r}
-density_bare_ground_glm <- glm(Percent_bare ~ Canopyapp, data = density, family = gaussian())
+density_bare_ground_glm <- glm(Percent_bare ~ Canopyapp, data = density, family = poisson())
 ```
 
 #### 5. Check the assumptions 
@@ -221,7 +221,7 @@ Based on the autoplot() results, I feel moderately comfortable moving ahead and 
 
 #### 6. Interpret the model
 ```{r, echo=FALSE}
-anova(density_bare_ground_glm)
+anova(density_bare_ground_glm, test = "Chisq")
 ```
 The P-value is 0.01603, which is fairly small. I reject the null hypothesis, and accept that canopy density has a significant effect on ground cover. 
 
@@ -236,11 +236,11 @@ Slope is estimated to be -5 and slope as 0.7, which is fairly similar to what I 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 ggplot(density, aes(x = Canopyapp, y = Percent_bare)) +
   geom_point(size = 2) +
-  geom_smooth(method = "lm") +
+  geom_smooth(method. = "glm") +
   xlab("Canopy Density") +
   ylab("Percent Bare Ground") 
 ```
-Swap to geom_smooth(method = "lm") as per notes in Data_Analysis.Rmd
+
 
 ### Statistical Test 3: Percent Ferns Between Kip and Donnerville
 

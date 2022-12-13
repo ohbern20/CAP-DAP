@@ -131,8 +131,8 @@ Y intercept: 0ish
 
 Decide on statistical test: I will use a linear regression since the predictor variable (canopy density) is somewhat continuous (ranges between 0-100), and the response variable (regeneration) is also continuous. Since regeneration (response variable) is count data, a linear regression seems appropriate to use because count data are assumed to fit a normal distribution which is an assumption of linear models. 
 
-#### 4. Create the Model
 
+#### 4. Create the Model
 ```{r}
 regen_dens_mod <- lm(num_seedlings ~ density, combined_data)
 ```
